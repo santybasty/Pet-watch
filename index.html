@@ -1,1 +1,1032 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <title>Pet Watch</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  >
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Inter", sans-serif;
+      background: #f6f8f7;
+      color: #17231e;
+    }
+
+    button,
+    input,
+    textarea {
+      font-family: inherit;
+    }
+
+    button {
+      cursor: pointer;
+      border: none;
+    }
+
+    /* =========================
+       APP LAYOUT
+    ========================== */
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 250px minmax(450px, 700px) 300px;
+      justify-content: center;
+      gap: 25px;
+      padding: 25px;
+    }
+
+    /* =========================
+       SIDEBAR
+    ========================== */
+
+    .sidebar {
+      position: sticky;
+      top: 25px;
+      height: calc(100vh - 50px);
+      background: white;
+      border-radius: 22px;
+      padding: 25px 18px;
+      box-shadow: 0 5px 25px rgba(0,0,0,0.05);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 10px 30px;
+    }
+
+    .logo-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 13px;
+      background: #42b883;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+    }
+
+    .logo h1 {
+      font-size: 21px;
+      font-weight: 800;
+    }
+
+    .logo span {
+      color: #42b883;
+    }
+
+    .nav {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .nav button {
+      background: transparent;
+      text-align: left;
+      padding: 13px 15px;
+      border-radius: 12px;
+      font-size: 14px;
+      color: #68756f;
+      transition: 0.2s;
+    }
+
+    .nav button:hover,
+    .nav button.active {
+      background: #e9f8f1;
+      color: #239663;
+      font-weight: 600;
+    }
+
+    .nav-icon {
+      margin-right: 12px;
+    }
+
+    .sidebar-bottom {
+      margin-top: auto;
+    }
+
+    .help-box {
+      background: #eef9f4;
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 15px;
+    }
+
+    .help-box h3 {
+      font-size: 13px;
+      margin-bottom: 7px;
+    }
+
+    .help-box p {
+      font-size: 11px;
+      line-height: 1.5;
+      color: #68756f;
+    }
+
+    .logout-btn {
+      width: 100%;
+      padding: 12px;
+      border-radius: 12px;
+      background: #f5f5f5;
+      color: #59635e;
+    }
+
+    /* =========================
+       MAIN
+    ========================== */
+
+    .main {
+      min-width: 0;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .topbar h2 {
+      font-size: 24px;
+    }
+
+    .search {
+      background: white;
+      border: 1px solid #e5e9e7;
+      border-radius: 13px;
+      padding: 10px 14px;
+      width: 220px;
+      outline: none;
+    }
+
+    /* =========================
+       CREATE POST
+    ========================== */
+
+    .create-post {
+      background: white;
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.04);
+      margin-bottom: 20px;
+    }
+
+    .create-top {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: #dff4e9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .create-input {
+      flex: 1;
+      border: none;
+      outline: none;
+      background: #f5f7f6;
+      border-radius: 20px;
+      padding: 12px 17px;
+      color: #68756f;
+    }
+
+    .post-tools {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 15px;
+      padding-top: 12px;
+      border-top: 1px solid #edf0ee;
+    }
+
+    .tool {
+      background: transparent;
+      color: #66736d;
+      padding: 7px 12px;
+      border-radius: 9px;
+    }
+
+    .tool:hover {
+      background: #f1f5f3;
+    }
+
+    .publish-btn {
+      background: #42b883;
+      color: white;
+      padding: 8px 18px;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+
+    /* =========================
+       POST
+    ========================== */
+
+    .post {
+      background: white;
+      border-radius: 18px;
+      margin-bottom: 20px;
+      padding: 18px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.04);
+    }
+
+    .post-header {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+    }
+
+    .post-user {
+      flex: 1;
+    }
+
+    .post-user strong {
+      display: block;
+      font-size: 14px;
+    }
+
+    .post-user small {
+      color: #89948f;
+      font-size: 11px;
+    }
+
+    .post-more {
+      background: transparent;
+      font-size: 20px;
+      color: #7d8883;
+    }
+
+    .post-text {
+      margin: 15px 0;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .pet-tag {
+      display: inline-block;
+      padding: 6px 10px;
+      background: #fff1dc;
+      color: #b66d14;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .post-image {
+      width: 100%;
+      max-height: 450px;
+      object-fit: cover;
+      border-radius: 14px;
+      display: block;
+    }
+
+    .post-actions {
+      display: flex;
+      gap: 20px;
+      padding-top: 13px;
+      margin-top: 12px;
+      border-top: 1px solid #edf0ee;
+    }
+
+    .action-btn {
+      background: transparent;
+      color: #69756f;
+      font-size: 13px;
+    }
+
+    .action-btn:hover {
+      color: #239663;
+    }
+
+    .action-btn.liked {
+      color: #e15c65;
+      font-weight: 600;
+    }
+
+    /* =========================
+       RIGHT SIDEBAR
+    ========================== */
+
+    .rightbar {
+      position: sticky;
+      top: 25px;
+      height: fit-content;
+    }
+
+    .profile-card,
+    .community-card,
+    .tips-card {
+      background: white;
+      border-radius: 18px;
+      padding: 20px;
+      margin-bottom: 18px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.04);
+    }
+
+    .profile-card {
+      text-align: center;
+    }
+
+    .profile-card .avatar {
+      margin: auto;
+      width: 70px;
+      height: 70px;
+      font-size: 30px;
+    }
+
+    .profile-card h3 {
+      margin-top: 12px;
+      font-size: 16px;
+    }
+
+    .profile-card p {
+      color: #89948f;
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    .profile-stats {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 18px;
+    }
+
+    .profile-stats strong {
+      display: block;
+      font-size: 15px;
+    }
+
+    .profile-stats span {
+      color: #89948f;
+      font-size: 10px;
+    }
+
+    .card-title {
+      font-size: 14px;
+      margin-bottom: 14px;
+    }
+
+    .community-item {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 13px;
+      align-items: center;
+    }
+
+    .community-item .mini-avatar {
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      background: #e6f4ee;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .community-item strong {
+      font-size: 12px;
+      display: block;
+    }
+
+    .community-item span {
+      color: #89948f;
+      font-size: 10px;
+    }
+
+    .tip {
+      font-size: 12px;
+      line-height: 1.6;
+      color: #68756f;
+    }
+
+    /* =========================
+       MODAL
+    ========================== */
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(20,30,25,0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 20px;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-box {
+      background: white;
+      width: 100%;
+      max-width: 520px;
+      border-radius: 20px;
+      padding: 25px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .close {
+      background: transparent;
+      font-size: 24px;
+      color: #777;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 7px;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      border: 1px solid #dfe6e2;
+      border-radius: 10px;
+      padding: 11px;
+      outline: none;
+      resize: vertical;
+    }
+
+    .form-group textarea {
+      min-height: 100px;
+    }
+
+    .submit-post {
+      width: 100%;
+      background: #42b883;
+      color: white;
+      padding: 13px;
+      border-radius: 11px;
+      font-weight: 700;
+    }
+
+    /* =========================
+       AUTH
+    ========================== */
+
+    .auth-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #eef8f3;
+      padding: 20px;
+    }
+
+    .auth-box {
+      width: 100%;
+      max-width: 420px;
+      background: white;
+      border-radius: 25px;
+      padding: 35px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+    }
+
+    .auth-logo {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    .auth-logo .logo-icon {
+      margin: auto;
+    }
+
+    .auth-logo h1 {
+      margin-top: 10px;
+    }
+
+    .auth-logo span {
+      color: #42b883;
+    }
+
+    .auth-box h2 {
+      text-align: center;
+      margin-bottom: 7px;
+    }
+
+    .auth-subtitle {
+      text-align: center;
+      color: #89948f;
+      font-size: 12px;
+      margin-bottom: 25px;
+    }
+
+    .auth-button {
+      width: 100%;
+      padding: 13px;
+      border-radius: 11px;
+      background: #42b883;
+      color: white;
+      font-weight: 700;
+      margin-top: 5px;
+    }
+
+    .switch-auth {
+      text-align: center;
+      margin-top: 18px;
+      font-size: 12px;
+      color: #89948f;
+    }
+
+    .switch-auth button {
+      background: transparent;
+      color: #239663;
+      font-weight: 700;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* =========================
+       MOBILE
+    ========================== */
+
+    @media (max-width: 1100px) {
+      .app {
+        grid-template-columns: 210px minmax(400px, 700px);
+      }
+
+      .rightbar {
+        display: none;
+      }
+    }
+
+    @media (max-width: 750px) {
+      .app {
+        display: block;
+        padding: 10px;
+      }
+
+      .sidebar {
+        position: fixed;
+        bottom: 10px;
+        left: 10px;
+        right: 10px;
+        top: auto;
+        height: auto;
+        z-index: 50;
+        padding: 8px;
+        border-radius: 18px;
+      }
+
+      .logo,
+      .sidebar-bottom {
+        display: none;
+      }
+
+      .nav {
+        flex-direction: row;
+        justify-content: space-around;
+      }
+
+      .nav button {
+        font-size: 0;
+        padding: 10px 15px;
+      }
+
+      .nav-icon {
+        font-size: 20px;
+        margin: 0;
+      }
+
+      .main {
+        padding-bottom: 80px;
+      }
+
+      .topbar h2 {
+        font-size: 20px;
+      }
+
+      .search {
+        width: 150px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- =========================
+       AUTH SCREEN
+  ========================== -->
+
+  <section id="authScreen" class="auth-screen">
+
+    <div class="auth-box">
+
+      <div class="auth-logo">
+        <div class="logo-icon">🐾</div>
+        <h1>Pet <span>Watch</span></h1>
+      </div>
+
+      <div id="loginForm">
+
+        <h2>Welcome back</h2>
+
+        <p class="auth-subtitle">
+          Help your community bring pets home.
+        </p>
+
+        <div class="form-group">
+          <label>Email</label>
+          <input id="loginEmail" type="email" placeholder="you@email.com">
+        </div>
+
+        <div class="form-group">
+          <label>Password</label>
+          <input id="loginPassword" type="password" placeholder="Password">
+        </div>
+
+        <button id="loginBtn" class="auth-button">
+          Log In
+        </button>
+
+        <p class="switch-auth">
+          Don't have an account?
+          <button id="showRegister">Create one</button>
+        </p>
+
+      </div>
+
+      <div id="registerForm" class="hidden">
+
+        <h2>Create your account</h2>
+
+        <p class="auth-subtitle">
+          Join Pet Watch and help your community.
+        </p>
+
+        <div class="form-group">
+          <label>Full name</label>
+          <input id="registerName" type="text" placeholder="Your name">
+        </div>
+
+        <div class="form-group">
+          <label>Email</label>
+          <input id="registerEmail" type="email" placeholder="you@email.com">
+        </div>
+
+        <div class="form-group">
+          <label>Password</label>
+          <input id="registerPassword" type="password" placeholder="At least 6 characters">
+        </div>
+
+        <button id="registerBtn" class="auth-button">
+          Create Account
+        </button>
+
+        <p class="switch-auth">
+          Already have an account?
+          <button id="showLogin">Log in</button>
+        </p>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- =========================
+       MAIN APPLICATION
+  ========================== -->
+
+  <div id="app" class="app hidden">
+
+    <!-- LEFT SIDEBAR -->
+
+    <aside class="sidebar">
+
+      <div class="logo">
+        <div class="logo-icon">🐾</div>
+        <h1>Pet <span>Watch</span></h1>
+      </div>
+
+      <nav class="nav">
+
+        <button class="active" id="homeBtn">
+          <span class="nav-icon">🏠</span>
+          Home
+        </button>
+
+        <button id="exploreBtn">
+          <span class="nav-icon">🔎</span>
+          Explore
+        </button>
+
+        <button id="notificationsBtn">
+          <span class="nav-icon">🔔</span>
+          Notifications
+        </button>
+
+        <button id="profileBtn">
+          <span class="nav-icon">👤</span>
+          Profile
+        </button>
+
+      </nav>
+
+      <div class="sidebar-bottom">
+
+        <div class="help-box">
+          <h3>🐕 See a missing pet?</h3>
+          <p>
+            Share information responsibly and help reunite pets with their families.
+          </p>
+        </div>
+
+        <button id="logoutBtn" class="logout-btn">
+          Log out
+        </button>
+
+      </div>
+
+    </aside>
+
+
+    <!-- MAIN FEED -->
+
+    <main class="main">
+
+      <header class="topbar">
+
+        <h2>Community Feed</h2>
+
+        <input
+          id="searchInput"
+          class="search"
+          type="search"
+          placeholder="Search posts..."
+        >
+
+      </header>
+
+
+      <!-- CREATE POST -->
+
+      <section class="create-post">
+
+        <div class="create-top">
+
+          <div class="avatar" id="currentAvatar">
+            🐾
+          </div>
+
+          <input
+            id="quickPostInput"
+            class="create-input"
+            placeholder="Share a missing pet or update..."
+          >
+
+        </div>
+
+        <div class="post-tools">
+
+          <button id="photoBtn" class="tool">
+            📷 Photo
+          </button>
+
+          <button id="missingBtn" class="tool">
+            🚨 Missing Pet
+          </button>
+
+          <button id="openPostBtn" class="publish-btn">
+            Post
+          </button>
+
+        </div>
+
+      </section>
+
+
+      <!-- FEED -->
+
+      <section id="feed">
+
+        <div style="text-align:center;padding:30px;color:#89948f;">
+          Loading community posts...
+        </div>
+
+      </section>
+
+    </main>
+
+
+    <!-- RIGHT SIDEBAR -->
+
+    <aside class="rightbar">
+
+      <div class="profile-card">
+
+        <div class="avatar" id="profileAvatar">
+          🐾
+        </div>
+
+        <h3 id="profileName">
+          Pet Watch User
+        </h3>
+
+        <p id="profileEmail">
+          Community member
+        </p>
+
+        <div class="profile-stats">
+
+          <div>
+            <strong id="postCount">0</strong>
+            <span>Posts</span>
+          </div>
+
+          <div>
+            <strong id="foundCount">0</strong>
+            <span>Found</span>
+          </div>
+
+          <div>
+            <strong id="helpCount">0</strong>
+            <span>Helped</span>
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="community-card">
+
+        <h3 class="card-title">
+          🌎 Community
+        </h3>
+
+        <div class="community-item">
+          <div class="mini-avatar">🐶</div>
+          <div>
+            <strong>Local Pet Watchers</strong>
+            <span>Active community</span>
+          </div>
+        </div>
+
+        <div class="community-item">
+          <div class="mini-avatar">🐱</div>
+          <div>
+            <strong>Missing Pets</strong>
+            <span>Help find them</span>
+          </div>
+        </div>
+
+        <div class="community-item">
+          <div class="mini-avatar">❤️</div>
+          <div>
+            <strong>Pet Heroes</strong>
+            <span>People helping others</span>
+          </div>
+        </div>
+
+      </div>
+
+
+      <div class="tips-card">
+
+        <h3 class="card-title">
+          💡 Pet Watch Tip
+        </h3>
+
+        <p class="tip">
+          When reporting a missing pet, include the last known location,
+          recognizable features and a clear photo.
+        </p>
+
+      </div>
+
+    </aside>
+
+  </div>
+
+
+  <!-- =========================
+       CREATE POST MODAL
+  ========================== -->
+
+  <div id="postModal" class="modal">
+
+    <div class="modal-box">
+
+      <div class="modal-header">
+
+        <h2>Create a Post</h2>
+
+        <button id="closeModal" class="close">
+          ×
+        </button>
+
+      </div>
+
+      <div class="form-group">
+        <label>Post type</label>
+
+        <select id="postType">
+          <option value="general">Community Update</option>
+          <option value="missing">🚨 Missing Pet</option>
+          <option value="found">❤️ Pet Found</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Pet name</label>
+        <input id="petName" placeholder="Example: Max">
+      </div>
+
+      <div class="form-group">
+        <label>Location last seen</label>
+        <input id="petLocation" placeholder="Example: Central Park">
+      </div>
+
+      <div class="form-group">
+        <label>Description</label>
+
+        <textarea
+          id="postDescription"
+          placeholder="Tell the community what happened..."
+        ></textarea>
+      </div>
+
+      <div class="form-group">
+
+        <label>Pet photo</label>
+
+        <input
+          id="petPhoto"
+          type="file"
+          accept="image/*"
+        >
+
+      </div>
+
+      <button id="submitPost" class="submit-post">
+        Publish Post
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <!-- Firebase + App -->
+
+  <script type="module" src="./app.js"></script>
+
+</body>
+</html>
