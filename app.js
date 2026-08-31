@@ -1,11 +1,13 @@
+```javascript
 // ============================================
 // PET WATCH
 // Firebase + Social Feed
 // ============================================
 
-import {
-  initializeApp
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+// ---------- FIREBASE IMPORTS ----------
+
+import { initializeApp }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
 import {
   getAuth,
@@ -21,14 +23,13 @@ import {
   collection,
   addDoc,
   getDocs,
-  getDoc,
-  doc,
-  updateDoc,
   query,
   orderBy,
   serverTimestamp,
   arrayUnion,
-  arrayRemove
+  arrayRemove,
+  updateDoc,
+  doc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 import {
@@ -40,23 +41,21 @@ import {
 
 
 // ============================================
-// 1. FIREBASE CONFIG
+// FIREBASE CONFIGURATION
 // ============================================
 
-// REPLACE THESE VALUES WITH YOUR FIREBASE PROJECT VALUES
-
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT.firebasestorage.app",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyBwx1-yHrGXNkVvIIBP97W9-HR2bj9UFBc",
+  authDomain: "pet-watch-76184.firebaseapp.com",
+  projectId: "pet-watch-76184",
+  storageBucket: "pet-watch-76184.firebasestorage.app",
+  messagingSenderId: "453733578590",
+  appId: "1:453733578590:web:d0799bedc92e204643c1cf"
 };
 
 
 // ============================================
-// 2. INITIALIZE FIREBASE
+// INITIALIZE FIREBASE
 // ============================================
 
 const firebaseApp = initializeApp(firebaseConfig);
@@ -69,7 +68,7 @@ const storage = getStorage(firebaseApp);
 
 
 // ============================================
-// 3. DOM ELEMENTS
+// HTML ELEMENTS
 // ============================================
 
 const authScreen = document.getElementById("authScreen");
@@ -91,7 +90,7 @@ const postModal = document.getElementById("postModal");
 
 
 // ============================================
-// 4. SWITCH LOGIN / REGISTER
+// LOGIN / REGISTER SWITCH
 // ============================================
 
 document.getElementById("showRegister").addEventListener("click", () => {
@@ -113,14 +112,17 @@ document.getElementById("showLogin").addEventListener("click", () => {
 
 
 // ============================================
-// 5. REGISTER
+// REGISTER NEW USER
 // ============================================
 
 document.getElementById("registerBtn").addEventListener("click", async () => {
 
   const name = registerName.value.trim();
+
   const email = registerEmail.value.trim();
+
   const password = registerPassword.value;
+
 
   if (!name || !email || !password) {
 
@@ -130,6 +132,7 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
 
   }
 
+
   if (password.length < 6) {
 
     alert("Password must be at least 6 characters.");
@@ -138,7 +141,10 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
 
   }
 
+
   try {
+
+    // Create Firebase account
 
     const userCredential =
       await createUserWithEmailAndPassword(
@@ -147,34 +153,45 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
         password
       );
 
+
     const user = userCredential.user;
 
 
+    // Add the user's name to Firebase Authentication
+
     await updateProfile(user, {
+
       displayName: name
-    });
-
-
-    await addDoc(collection(db, "users"), {
-
-      uid: user.uid,
-
-      name: name,
-
-      email: email,
-
-      createdAt: serverTimestamp(),
-
-      posts: 0,
-
-      helped: 0,
-
-      found: 0
 
     });
 
 
-    alert("Welcome to Pet Watch! 🐾");
+    // Create user document in Firestore
+
+    await addDoc(
+      collection(db, "users"),
+      {
+
+        uid: user.uid,
+
+        name: name,
+
+        email: email,
+
+        posts: 0,
+
+        found: 0,
+
+        helped: 0,
+
+        createdAt: serverTimestamp()
+
+      }
+    );
+
+
+    alert("Account created! Welcome to Pet Watch 🐾");
+
 
   } catch (error) {
 
@@ -188,7 +205,7 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
 
 
 // ============================================
-// 6. LOGIN
+// LOGIN
 // ============================================
 
 document.getElementById("loginBtn").addEventListener("click", async () => {
@@ -196,6 +213,7 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
   const email = loginEmail.value.trim();
 
   const password = loginPassword.value;
+
 
   if (!email || !password) {
 
@@ -205,6 +223,7 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
 
   }
 
+
   try {
 
     await signInWithEmailAndPassword(
@@ -213,11 +232,12 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
       password
     );
 
+
   } catch (error) {
 
     console.error(error);
 
-    alert("Unable to log in. Please check your information.");
+    alert("Incorrect email or password.");
 
   }
 
@@ -225,33 +245,48 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
 
 
 // ============================================
-// 7. LOGOUT
+// LOGOUT
 // ============================================
 
 document.getElementById("logoutBtn").addEventListener("click", async () => {
 
-  await signOut(auth);
+  try {
+
+    await signOut(auth);
+
+  } catch (error) {
+
+    console.error(error);
+
+  }
 
 });
 
 
 // ============================================
-// 8. AUTH STATE
+// AUTHENTICATION STATE
 // ============================================
 
 onAuthStateChanged(auth, async (user) => {
 
   if (user) {
 
+    // User is logged in
+
     authScreen.classList.add("hidden");
 
     appScreen.classList.remove("hidden");
 
+
     updateProfileUI(user);
+
 
     await loadFeed();
 
+
   } else {
+
+    // User is logged out
 
     authScreen.classList.remove("hidden");
 
@@ -263,7 +298,7 @@ onAuthStateChanged(auth, async (user) => {
 
 
 // ============================================
-// 9. UPDATE PROFILE UI
+// UPDATE PROFILE
 // ============================================
 
 function updateProfileUI(user) {
@@ -272,16 +307,21 @@ function updateProfileUI(user) {
     user.displayName ||
     user.email.split("@")[0];
 
-  document.getElementById("profileName").textContent = name;
 
-  document.getElementById("profileEmail").textContent =
-    user.email;
+  document.getElementById(
+    "profileName"
+  ).textContent = name;
+
+
+  document.getElementById(
+    "profileEmail"
+  ).textContent = user.email;
 
 }
 
 
 // ============================================
-// 10. OPEN POST MODAL
+// OPEN CREATE POST MODAL
 // ============================================
 
 document.getElementById("openPostBtn").addEventListener("click", () => {
@@ -324,16 +364,17 @@ document.getElementById("closeModal").addEventListener("click", () => {
 
 
 // ============================================
-// 11. CREATE POST
+// CREATE POST
 // ============================================
 
 document.getElementById("submitPost").addEventListener("click", async () => {
 
   const user = auth.currentUser;
 
+
   if (!user) {
 
-    alert("You must be logged in.");
+    alert("Please log in first.");
 
     return;
 
@@ -343,14 +384,18 @@ document.getElementById("submitPost").addEventListener("click", async () => {
   const type =
     document.getElementById("postType").value;
 
+
   const petName =
     document.getElementById("petName").value.trim();
+
 
   const location =
     document.getElementById("petLocation").value.trim();
 
+
   const description =
     document.getElementById("postDescription").value.trim();
+
 
   const photoFile =
     document.getElementById("petPhoto").files[0];
@@ -370,12 +415,15 @@ document.getElementById("submitPost").addEventListener("click", async () => {
     let imageURL = "";
 
 
-    // Upload image to Firebase Storage
+    // ========================================
+    // UPLOAD PET PHOTO
+    // ========================================
 
     if (photoFile) {
 
       const filePath =
         `posts/${user.uid}/${Date.now()}_${photoFile.name}`;
+
 
       const storageReference =
         ref(storage, filePath);
@@ -393,38 +441,45 @@ document.getElementById("submitPost").addEventListener("click", async () => {
     }
 
 
-    // Create Firestore post
+    // ========================================
+    // SAVE POST TO FIRESTORE
+    // ========================================
 
-    await addDoc(collection(db, "posts"), {
+    await addDoc(
+      collection(db, "posts"),
+      {
 
-      uid: user.uid,
+        uid: user.uid,
 
-      authorName:
-        user.displayName ||
-        user.email.split("@")[0],
+        authorName:
+          user.displayName ||
+          user.email.split("@")[0],
 
-      authorEmail: user.email,
+        authorEmail: user.email,
 
-      type: type,
+        type: type,
 
-      petName: petName,
+        petName: petName,
 
-      location: location,
+        location: location,
 
-      description: description,
+        description: description,
 
-      imageURL: imageURL,
+        imageURL: imageURL,
 
-      likes: [],
+        likes: [],
 
-      comments: [],
+        comments: [],
 
-      createdAt: serverTimestamp()
+        createdAt: serverTimestamp()
 
-    });
+      }
+    );
 
 
-    // Reset form
+    // ========================================
+    // CLEAR FORM
+    // ========================================
 
     document.getElementById("petName").value = "";
 
@@ -436,20 +491,23 @@ document.getElementById("submitPost").addEventListener("click", async () => {
 
     document.getElementById("postType").value = "general";
 
+
     postModal.classList.remove("active");
 
 
     await loadFeed();
 
 
-    alert("Your post has been published! 🐾");
+    alert("Post published! 🐾");
 
 
   } catch (error) {
 
     console.error(error);
 
-    alert("There was a problem publishing your post.");
+    alert(
+      "There was a problem publishing your post. Check your Firebase settings."
+    );
 
   }
 
@@ -457,7 +515,7 @@ document.getElementById("submitPost").addEventListener("click", async () => {
 
 
 // ============================================
-// 12. LOAD FEED
+// LOAD POSTS
 // ============================================
 
 async function loadFeed() {
@@ -469,7 +527,7 @@ async function loadFeed() {
       padding:30px;
       color:#89948f;
     ">
-      Loading posts...
+      Loading community posts...
     </div>
 
   `;
@@ -519,15 +577,9 @@ async function loadFeed() {
 
     snapshot.forEach((postDocument) => {
 
-      const post =
-        postDocument.data();
-
-      const postID =
-        postDocument.id;
-
       renderPost(
-        post,
-        postID
+        postDocument.data(),
+        postDocument.id
       );
 
     });
@@ -547,7 +599,7 @@ async function loadFeed() {
           color:#89948f;
           margin-top:8px;
         ">
-          Check your Firebase configuration and Firestore rules.
+          Check your Firestore setup and security rules.
         </p>
 
       </div>
@@ -560,48 +612,61 @@ async function loadFeed() {
 
 
 // ============================================
-// 13. RENDER POST
+// DISPLAY A POST
 // ============================================
 
 function renderPost(post, postID) {
 
   const user = auth.currentUser;
 
+
   const likes =
     post.likes || [];
 
+
   const isLiked =
-    user && likes.includes(user.uid);
+    user &&
+    likes.includes(user.uid);
 
 
   let tag = "";
 
+
   if (post.type === "missing") {
 
-    tag = `<span class="pet-tag">🚨 MISSING PET</span>`;
+    tag =
+      `<span class="pet-tag">
+        🚨 MISSING PET
+      </span>`;
 
   }
+
 
   if (post.type === "found") {
 
-    tag = `<span class="pet-tag">❤️ PET FOUND</span>`;
+    tag =
+      `<span class="pet-tag">
+        ❤️ PET FOUND
+      </span>`;
 
   }
 
 
-  const image = post.imageURL
-    ? `
-      <img
-        class="post-image"
-        src="${escapeHTML(post.imageURL)}"
-        alt="Pet"
-      >
-    `
-    : "";
+  const image =
+    post.imageURL
+      ? `
+        <img
+          class="post-image"
+          src="${escapeHTML(post.imageURL)}"
+          alt="Missing or found pet"
+        >
+      `
+      : "";
 
 
   const postElement =
     document.createElement("article");
+
 
   postElement.className = "post";
 
@@ -614,17 +679,26 @@ function renderPost(post, postID) {
         🐾
       </div>
 
+
       <div class="post-user">
 
         <strong>
-          ${escapeHTML(post.authorName || "Pet Watch User")}
+          ${escapeHTML(
+            post.authorName ||
+            "Pet Watch User"
+          )}
         </strong>
 
+
         <small>
-          ${escapeHTML(post.location || "Community")}
+          ${escapeHTML(
+            post.location ||
+            "Community"
+          )}
         </small>
 
       </div>
+
 
       <button class="post-more">
         •••
@@ -637,11 +711,18 @@ function renderPost(post, postID) {
 
       ${tag}
 
+
       ${
         post.petName
-          ? `<strong>${escapeHTML(post.petName)}</strong><br>`
+          ? `
+            <strong>
+              ${escapeHTML(post.petName)}
+            </strong>
+            <br>
+          `
           : ""
       }
+
 
       ${escapeHTML(post.description)}
 
@@ -660,12 +741,14 @@ function renderPost(post, postID) {
         ❤️ ${likes.length} Like
       </button>
 
+
       <button
         class="action-btn"
         data-comment="${postID}"
       >
         💬 Comment
       </button>
+
 
       <button
         class="action-btn"
@@ -682,91 +765,93 @@ function renderPost(post, postID) {
   feed.appendChild(postElement);
 
 
-  // Like button
+  // LIKE
 
-  const likeButton =
-    postElement.querySelector(
+  postElement
+    .querySelector(
       `[data-like="${postID}"]`
-    );
-
-
-  likeButton.addEventListener(
-    "click",
-    () => toggleLike(
-      postID,
-      likes
     )
-  );
+    .addEventListener(
+      "click",
+      () => toggleLike(
+        postID,
+        likes
+      )
+    );
 
 
-  // Comment button
+  // COMMENT
 
-  const commentButton =
-    postElement.querySelector(
+  postElement
+    .querySelector(
       `[data-comment="${postID}"]`
-    );
+    )
+    .addEventListener(
+      "click",
+      () => {
+
+        const comment =
+          prompt("Write a comment:");
 
 
-  commentButton.addEventListener(
-    "click",
-    () => {
-
-      const comment =
-        prompt("Write a comment:");
-
-      if (comment && comment.trim()) {
-
-        addComment(
-          postID,
+        if (
+          comment &&
           comment.trim()
-        );
+        ) {
+
+          addComment(
+            postID,
+            comment.trim()
+          );
+
+        }
 
       }
-
-    }
-  );
-
-
-  // Share
-
-  const shareButton =
-    postElement.querySelector(
-      `[data-share="${postID}"]`
     );
 
 
-  shareButton.addEventListener(
-    "click",
-    async () => {
+  // SHARE
 
-      const shareText =
-        `Check out this Pet Watch post about ${
-          post.petName || "a pet"
-        } 🐾`;
+  postElement
+    .querySelector(
+      `[data-share="${postID}"]`
+    )
+    .addEventListener(
+      "click",
+      async () => {
+
+        const shareText =
+          `Check out this Pet Watch post about ${
+            post.petName || "a pet"
+          } 🐾`;
 
 
-      try {
+        try {
 
-        await navigator.clipboard.writeText(
-          shareText
-        );
+          await navigator.clipboard.writeText(
+            shareText
+          );
 
-        alert("Post information copied!");
 
-      } catch {
+          alert(
+            "Post information copied!"
+          );
 
-        alert(shareText);
+
+        } catch {
+
+          alert(shareText);
+
+        }
 
       }
-
-    }
-  );
+    );
 
 }
 
 
 // ============================================
-// 14. LIKE POST
+// LIKE / UNLIKE
 // ============================================
 
 async function toggleLike(
@@ -791,21 +876,36 @@ async function toggleLike(
 
   try {
 
-    if (currentLikes.includes(user.uid)) {
+    if (
+      currentLikes.includes(
+        user.uid
+      )
+    ) {
 
       await updateDoc(
         postReference,
         {
-          likes: arrayRemove(user.uid)
+
+          likes:
+            arrayRemove(
+              user.uid
+            )
+
         }
       );
+
 
     } else {
 
       await updateDoc(
         postReference,
         {
-          likes: arrayUnion(user.uid)
+
+          likes:
+            arrayUnion(
+              user.uid
+            )
+
         }
       );
 
@@ -813,6 +913,7 @@ async function toggleLike(
 
 
     await loadFeed();
+
 
   } catch (error) {
 
@@ -824,7 +925,7 @@ async function toggleLike(
 
 
 // ============================================
-// 15. ADD COMMENT
+// ADD COMMENT
 // ============================================
 
 async function addComment(
@@ -868,8 +969,10 @@ async function addComment(
     await updateDoc(
       postReference,
       {
+
         comments:
           arrayUnion(comment)
+
       }
     );
 
@@ -889,7 +992,7 @@ async function addComment(
 
 
 // ============================================
-// 16. SEARCH POSTS
+// SEARCH
 // ============================================
 
 document
@@ -907,7 +1010,10 @@ document
       const postsQuery =
         query(
           collection(db, "posts"),
-          orderBy("createdAt", "desc")
+          orderBy(
+            "createdAt",
+            "desc"
+          )
         );
 
 
@@ -918,44 +1024,48 @@ document
       feed.innerHTML = "";
 
 
-      snapshot.forEach((document) => {
+      snapshot.forEach(
+        (postDocument) => {
 
-        const post =
-          document.data();
-
-
-        const searchableText = `
-
-          ${post.authorName || ""}
-
-          ${post.petName || ""}
-
-          ${post.location || ""}
-
-          ${post.description || ""}
-
-        `.toLowerCase();
+          const post =
+            postDocument.data();
 
 
-        if (
-          searchableText.includes(search)
-        ) {
+          const searchableText = `
 
-          renderPost(
-            post,
-            document.id
-          );
+            ${post.authorName || ""}
+
+            ${post.petName || ""}
+
+            ${post.location || ""}
+
+            ${post.description || ""}
+
+          `.toLowerCase();
+
+
+          if (
+            searchableText.includes(
+              search
+            )
+          ) {
+
+            renderPost(
+              post,
+              postDocument.id
+            );
+
+          }
 
         }
-
-      });
+      );
 
     }
   );
 
 
 // ============================================
-// 17. NAVIGATION
+// NAVIGATION
 // ============================================
 
 document
@@ -968,6 +1078,7 @@ document
         top: 0,
         behavior: "smooth"
       });
+
 
       loadFeed();
 
@@ -1018,7 +1129,7 @@ document
 
 
 // ============================================
-// 18. SECURITY HELPER
+// SECURITY HELPER
 // ============================================
 
 function escapeHTML(value) {
@@ -1026,10 +1137,31 @@ function escapeHTML(value) {
   if (!value) return "";
 
   return String(value)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
+
+    .replaceAll(
+      "&",
+      "&amp;"
+    )
+
+    .replaceAll(
+      "<",
+      "&lt;"
+    )
+
+    .replaceAll(
+      ">",
+      "&gt;"
+    )
+
+    .replaceAll(
+      '"',
+      "&quot;"
+    )
+
+    .replaceAll(
+      "'",
+      "&#039;"
+    );
 
 }
+```
